@@ -129,8 +129,11 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-*_offset.json
+config.json
+*offset.json
 session.txt
-/downloads
-/epubs
-/temp
+
+src/downloads
+src/epubs
+src/temp
+src/config.json

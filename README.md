@@ -38,12 +38,12 @@ this:
 
 ```json
 {
-  "API_ID": 0000000, // get it on https://my.telegram.org/apps
-  "API_HASH": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // get it on https://my.telegram.org/apps
-  "CHANNEL_NAME": "xxxxxxxxx", // this comes from the URL of the channel (https://t.me/xxxxxxxxx)
-  "MAX_MESSAGES_PER_RUN": 80, // how many messages to download per run
-  "SECONDS_BETWEEN_RUNS": 60, // how many seconds to wait between runs
-  "OUT": "./downloads" // where to save the files (relative to the current directory)
+  "API_ID": 0,
+  "API_HASH": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "CHANNEL_NAME": "xxxxxxxxx",
+  "MAX_MESSAGES_PER_RUN": 80,
+  "SECONDS_BETWEEN_RUNS": 60,
+  "OUT": "./downloads"
 }
 ```
 

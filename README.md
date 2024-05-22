@@ -134,7 +134,7 @@ Only download files with a specific extension:
 
 ```javascript
 const fileFilter = ({ extension }) => {
-  return file.extension === 'pdf'; // will only download .pdf files
+  return extension === 'pdf'; // will only download .pdf files
 };
 
 const teledown = new TeleDown(someConfig, fileFilter);

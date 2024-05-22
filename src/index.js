@@ -164,9 +164,7 @@ class TeleDown {
       outputFile: uniquePath
     });
 
-    const listeners = this.#getListeners(EVENTS.DOWNLOADED_FILE);
-
-    for (const listener of listeners) {
+    for (const listener of this.#getListeners(EVENTS.DOWNLOADED_FILE)) {
       await listener.callback({
         path: uniquePath,
         fileName,
@@ -226,7 +224,7 @@ class TeleDown {
       const shouldDownload = await this.#downloadFilter(file);
 
       if (shouldDownload) {
-        await this.#downloadFile(getFileInfo(file), file);
+        await this.#downloadFile(file);
       }
     }
 

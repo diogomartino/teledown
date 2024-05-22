@@ -15,7 +15,10 @@
     "lint": "eslint ./src",
     "lint:fix": "eslint --fix ./src",
     "magic": "pnpm run lint:fix && pnpm run format",
-    "deploy": "pnpm run build && npm publish --access public"
+    "deploy": "pnpm run build && npm publish --access public",
+    "link:local": "pnpm run build && pnpm link --global",
+    "link:remove": "pnpm uninstall --global teledown",
+    "link:refresh": "pnpm run link:remove && pnpm run link:local"
   },
   "files": [
     "dist"

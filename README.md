@@ -68,7 +68,7 @@ teledown --help
 ## As a library
 
 ```javascript
-import { TeleDown } from 'teledown';
+import TeleDown from 'teledown';
 
 const teledown = new TeleDown({
   API_ID: 'your_api_id', // get it on https://my.telegram.org/apps

@@ -1,6 +1,6 @@
 {
   "name": "teledown",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": "Diogo Martino",
   "license": "MIT",
   "description": "Telegram app to download files from a group",

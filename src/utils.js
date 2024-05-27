@@ -5,7 +5,7 @@ import crypto from 'crypto';
 
 export const getFileInfo = (file) => {
   const fileName = file.attributes?.[0]?.fileName;
-  const extension = fileName?.split('.').pop();
+  const extension = fileName?.split('.').pop()?.toLowerCase();
 
   return {
     fileName: fileName?.replace(/\.[^/.]+$/, ''),

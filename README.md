@@ -108,10 +108,7 @@ downloaded. The function recieves a `File` object and should return a boolean.
 The API is as follows:
 
 ```javascript
-const fileFilter = ({ fileName, extension, originalName }, telegramFile) => {
-  // fileName: the name of the file as it will be saved
-  // extension: the extension of the file
-  // originalName: the original name of the file
+const fileFilter = (telegramFile) => {
   // telegramFile: the full file object from Telegram, read the Telegram API docs for more info
 
   return true; // will download the file
@@ -133,7 +130,10 @@ const teledown = new TeleDown(someConfig, fileFilter);
 Only download files with a specific extension:
 
 ```javascript
-const fileFilter = ({ extension }) => {
+const fileFilter = (telegramFile) => {
+  const fileName = telegramFile?.attributes?.[0]?.fileName;
+  const extension = fileName?.split('.')?.pop();
+
   return extension === 'pdf'; // will only download .pdf files
 };
 

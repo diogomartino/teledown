@@ -103,12 +103,12 @@ class TeleDown {
       this.#config.API_ID,
       this.#config.API_HASH,
       {
-        connectionRetries: 10,
-        retryDelay: 1000,
-        downloadRetries: 10,
+        connectionRetries: 20,
+        retryDelay: 2000,
+        downloadRetries: 20,
         maxConcurrentDownloads: 5,
         autoReconnect: true,
-        requestRetries: 10,
+        requestRetries: 20,
         ...clientOptions
       }
     );
@@ -187,7 +187,12 @@ class TeleDown {
       new Api.messages.GetHistory({
         peer: this.#channel,
         offsetId: offsetId,
-        limit: +process.env.MAX_MESSAGES_PER_RUN
+        limit: +process.env.MAX_MESSAGES_PER_RUN,
+        addOffset: 0,
+        minId: 0,
+        maxId: 0,
+        offsetDate: 0,
+        hash: 0
       })
     );
 
@@ -219,14 +224,18 @@ class TeleDown {
       }
     }
 
+    const promises = [];
+
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const shouldDownload = await this.#downloadFilter(file);
 
       if (shouldDownload) {
-        await this.#downloadFile(file);
+        promises.push(this.#downloadFile(file));
       }
     }
+
+    await Promise.all(promises);
 
     const lastMessage = result.messages[result.messages.length - 1];
     const nextOffsetId = lastMessage.id;

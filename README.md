@@ -79,11 +79,30 @@ const teledown = new TeleDown({
   OUT: './downloads' // where to save the files (relative to the current directory)
 });
 
+// if no session is found, it will ask for the phone number and then the code sent by Telegram
+await teledown.authenticate();
+teledown.start();
+
+// later you can stop the process
+// if teledown is already processing a batch, it will finish it before stopping
+teleDown.stop();
+```
+
+### Events
+
+```javascript
+import TeleDown from 'teledown';
+
+const teledown = new TeleDown({
+  ... // config
+});
+
+// all the available events
 teledown.on('error', (err) => console.log(err));
 teledown.on('got-messages', (messages, offsetId) =>
   console.log(`Found ${messages.length} messages with offset ${offsetId}`)
 );
-teledown.on('downloaded-file', ({ originalFileName, md5 }) =>
+teledown.on('downloaded-file', ({ path, fileName, originalFileName, extension, md5, telegramFile }) =>
   console.log(`Downloaded ${originalFileName} (${md5})`)
 );
 teledown.on('start-batch', (offsetId) =>
@@ -96,8 +115,15 @@ teledown.on('end', (offsetId) =>
   console.log(`No more messages to process. Ending with offset ${offsetId}`)
 );
 
-await teledown.authenticate(); // if no session is found, it will ask for the phone number and the code sent by Telegram
-teledown.start();
+// you can also remove an event listener
+const listener = teledown.on('downloaded-file', ({ originalFileName, md5 }) =>
+  console.log(`Downloaded ${originalFileName} (${md5})`)
+);
+
+teledown.off(listener);
+
+// or remove all listeners
+teledown.offAll();
 ```
 
 ### Passing a filter function
@@ -142,20 +168,6 @@ const teledown = new TeleDown(someConfig, fileFilter);
 // rest of the code
 ```
 
-## Events
-
-```javascript
-teledown.on('error', (err) => {});
-teledown.on('got-messages', (messages, offsetId) => {});
-teledown.on(
-  'downloaded-file',
-  ({ path, fileName, originalFileName, extension, md5, telegramFile }) => {}
-);
-teledown.on('start-batch', (offsetId) => {});
-teledown.on('end-batch', (offsetId) => {});
-teledown.on('end', (offsetId) => {});
-```
-
 ## How it works
 
 Teledown uses the Telegram API to fetch messages from a specified channel or
@@ -166,7 +178,7 @@ allowing it to resume from where it left off in subsequent runs.
 ## Limits
 
 The Telegram API has rate limits, so Teledown includes a configurable delay
-(SECONDS_BETWEEN_RUNS) to avoid hitting these limits. The default delay is 60
+`SECONDS_BETWEEN_RUNS` to avoid hitting these limits. The default delay is 60
 seconds after processing each batch of 100 messages. The session TTL is also
 something to be mindful of, as re-authentication may be required after a certain
 period.

@@ -20,6 +20,8 @@ class TeleDown {
   #channel = null;
   #downloadFilter = null;
   #listeners = {};
+  #timeout = null;
+  #running = false;
 
   constructor(config, filter = () => true) {
     validateConfig(config);
@@ -50,6 +52,10 @@ class TeleDown {
 
   off(id) {
     delete this.#listeners[id];
+  }
+
+  offAll() {
+    this.#listeners = {};
   }
 
   #getListeners(event) {
@@ -140,39 +146,45 @@ class TeleDown {
   }
 
   async #downloadFile(file) {
-    const { fileName, extension, originalFileName } = getFileInfo(file);
+    try {
+      const { fileName, extension, originalFileName } = getFileInfo(file);
 
-    const downloadDir = path.join(cwd, this.#config.OUT);
+      const downloadDir = path.normalize(this.#config.OUT);
 
-    if (!fs.existsSync(downloadDir)) {
-      fs.mkdirSync(downloadDir);
-    }
+      if (!fs.existsSync(downloadDir)) {
+        fs.mkdirSync(downloadDir);
+      }
 
-    let uniquePath = path.join(downloadDir, `/${fileName}.${extension}`);
-    let i = 1;
+      let uniquePath = path.join(downloadDir, `/${fileName}.${extension}`);
+      let i = 1;
 
-    while (fs.existsSync(uniquePath)) {
-      uniquePath = path.join(
-        cwd,
-        this.#config.OUT,
-        `/${fileName}_${i}.${extension}`
-      );
-      i++;
-    }
+      while (fs.existsSync(uniquePath)) {
+        uniquePath = path.join(downloadDir, `/${fileName}_${i}.${extension}`);
+        i++;
+      }
 
-    await this.#client.downloadMedia(file, {
-      outputFile: uniquePath
-    });
-
-    for (const listener of this.#getListeners(EVENTS.DOWNLOADED_FILE)) {
-      await listener.callback({
-        path: uniquePath,
-        fileName,
-        originalFileName,
-        extension,
-        md5: md5File(uniquePath),
-        telegramFile: file
+      await this.#client.downloadMedia(file, {
+        outputFile: uniquePath
       });
+
+      for (const listener of this.#getListeners(EVENTS.DOWNLOADED_FILE)) {
+        await listener.callback({
+          path: uniquePath,
+          fileName,
+          originalFileName,
+          extension,
+          md5: md5File(uniquePath),
+          telegramFile: file
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  #killTimeout() {
+    if (this.#timeout) {
+      clearTimeout(this.#timeout);
     }
   }
 
@@ -242,20 +254,34 @@ class TeleDown {
 
     this.#writeOffset(nextOffsetId);
 
+    if (this.#running) {
+      this.#timeout = setTimeout(
+        () => this.#processMessages(nextOffsetId),
+        this.#config.SECONDS_BETWEEN_RUNS * 1000
+      );
+    }
+
     for (const listener of this.#getListeners(EVENTS.END_BATCH)) {
       await listener.callback(nextOffsetId);
     }
-
-    setTimeout(
-      () => this.#processMessages(nextOffsetId),
-      this.#config.SECONDS_BETWEEN_RUNS * 1000
-    );
   }
 
   async start() {
+    this.#killTimeout();
+    this.#running = true;
+
     const currentOffset = this.#readOffset();
 
     this.#processMessages(currentOffset);
+  }
+
+  async stop() {
+    this.#killTimeout();
+    this.#running = false;
+  }
+
+  isRunning() {
+    return this.#running;
   }
 }
 
